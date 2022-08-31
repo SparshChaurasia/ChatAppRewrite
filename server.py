@@ -1,14 +1,18 @@
 from twisted.internet import reactor
-from twisted.internet.protocol import Protocol, ServerFactory
+from twisted.internet.protocol import Protocol
+from twisted.internet.protocol import ServerFactory as BaseServerFactory 
 from twisted.internet.endpoints import TCP4ServerEndpoint
 
 class Server(Protocol):
     def connectionMade(self):
         print("New connection")
-        self.transport.write("An apple a day keeps the doctor away".encode("utf-8"))
-        self.transport.loseConnection()
+        self.transport.write("Hello from server".encode("utf-8"))
 
-class ServerFactory(ServerFactory):
+    def dataReceived(self, data):
+        print(data.decode("utf-8"))
+        self.transport.write(data)
+
+class ServerFactory(BaseServerFactory):
     def buildProtocol(self, addr):
         return Server()
 
