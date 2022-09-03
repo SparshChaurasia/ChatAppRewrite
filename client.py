@@ -4,12 +4,17 @@ from twisted.internet.protocol import ClientFactory as BaseClientFactory
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
 class Client(Protocol):
+    def __init__(self):
+        reactor.callInThread(self.send_message)
+
     def dataReceived(self, data):
         data = data.decode("utf-8")
         print(data)
 
-        msg = input("> ").encode("utf-8")
-        self.transport.write(msg)
+    def send_message(self):
+        while True:
+            msg = input().encode("utf-8")
+            self.transport.write(msg)
 
 
 class ClientFactory(BaseClientFactory):
