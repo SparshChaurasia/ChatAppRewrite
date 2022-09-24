@@ -2,12 +2,15 @@ from twisted.internet import reactor
 from twisted.internet.protocol import Protocol, connectionDone
 from twisted.internet.protocol import ServerFactory as BaseServerFactory 
 from twisted.internet.endpoints import TCP4ServerEndpoint
+from enum import Enum
+
+State = Enum('state', 'GETNAME CHAT')
 
 class Server(Protocol):
     def __init__(self, users):
         self.users = users
         self.name = None
-        self.state = "getname"
+        self.state = State.GETNAME
 
     def connectionMade(self):
         print("New connection")
@@ -17,7 +20,7 @@ class Server(Protocol):
         del self.users[self.name]
 
     def dataReceived(self, data):
-        if self.state == "getname":
+        if self.state == State.GETNAME:
             self.handle_getname(data)
         else:
             self.handle_chat(data)
@@ -30,7 +33,7 @@ class Server(Protocol):
         self.users[name] = self
 
         print(self.name.decode("utf-8"), "joined the chat!")
-        self.state= "chat"
+        self.state= State.CHAT
 
     def handle_chat(self, data):
         for name, conn in self.users.items():

@@ -1,13 +1,15 @@
 from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
+from enum import Enum
 
+State = Enum('state', 'GETPEER CHAT')
 
 class P2PClient(DatagramProtocol):
     def __init__(self, host, port):
         self.id = (host, port)
         self.peer = None
         self.rendezvous_server = ("127.0.0.1", 9999)
-        self.state = "getpeer"
+        self.state = State.GETPEER
 
         print("Working on id: ", self.id)
 
@@ -16,7 +18,7 @@ class P2PClient(DatagramProtocol):
         self.transport.write(msg, self.rendezvous_server)
 
     def datagramReceived(self, datagram, addr):
-        if self.state == "getpeer":
+        if self.state == State.GETPEER:
             self.handle_getpeer(datagram, addr)
         else:
             self.handle_chat(datagram, addr)
@@ -27,7 +29,7 @@ class P2PClient(DatagramProtocol):
         print("Chose a peer to connect", data)
         self.peer = input("enter host: "), int(input("enter port: "))
         reactor.callInThread(self.send_messages)
-        self.state = "chat"
+        self.state = State.CHAT
 
 
     def handle_chat(self, datagram, addr):
