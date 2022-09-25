@@ -2,18 +2,21 @@ from twisted.internet import reactor
 from twisted.internet.protocol import Protocol
 from twisted.internet.protocol import ReconnectingClientFactory as BaseClientFactory
 from twisted.internet.endpoints import TCP4ClientEndpoint
+from utility import Message
+import pickle
 
 class Client(Protocol):
     def __init__(self):
         reactor.callInThread(self.send_message)
 
     def dataReceived(self, data):
-        data = data.decode("utf-8")
-        print(data)
+        msg = pickle.loads(data)
+        print(msg)
 
     def send_message(self):
         while True:
-            msg = input().encode("utf-8")
+            _msg = input()
+            msg = Message(_msg).encode_msg()
             self.transport.write(msg)
 
 
