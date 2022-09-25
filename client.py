@@ -1,9 +1,12 @@
+import pickle
+
 from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.internet.protocol import Protocol
 from twisted.internet.protocol import ReconnectingClientFactory as BaseClientFactory
-from twisted.internet.endpoints import TCP4ClientEndpoint
+
 from utility import Message
-import pickle
+
 
 class Client(Protocol):
     def __init__(self):

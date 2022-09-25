@@ -1,10 +1,13 @@
-from twisted.internet import reactor
-from twisted.internet.protocol import Protocol, connectionDone
-from twisted.internet.protocol import ServerFactory as BaseServerFactory 
-from twisted.internet.endpoints import TCP4ServerEndpoint
-from enum import Enum
-from utility import Message
 import pickle
+from enum import Enum
+
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ServerEndpoint
+from twisted.internet.protocol import Protocol
+from twisted.internet.protocol import ServerFactory as BaseServerFactory
+from twisted.internet.protocol import connectionDone
+
+from utility import Message
 
 State = Enum('state', 'GETNAME CHAT')
 

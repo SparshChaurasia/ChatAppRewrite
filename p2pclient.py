@@ -1,6 +1,7 @@
-from twisted.internet.protocol import DatagramProtocol
-from twisted.internet import reactor
 from enum import Enum
+
+from twisted.internet import reactor
+from twisted.internet.protocol import DatagramProtocol
 
 State = Enum('state', 'GETPEER CHAT')
 
