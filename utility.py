@@ -7,10 +7,11 @@ from datetime import datetime
 @dataclass
 class Message:
     msg: str
+    author: str = None
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
     def __repr__(self):
-        return f"{self.timestamp}: {self.msg}"
+        return f"[{self.timestamp.strftime('%H:%M')}][{self.author}] {self.msg}"
 
     def encode_msg(self):
         serial_obj = pickle.dumps(self)

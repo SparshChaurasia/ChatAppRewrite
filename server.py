@@ -19,26 +19,29 @@ class Server(Protocol):
 
     def connectionMade(self):
         print("New connection")
-        msg = Message("Hello from server!\nPlease enter your name").encode_msg()
+        msg = Message("Hello from server!\nPlease enter your name", "SERVER").encode_msg()
         self.transport.write(msg)
 
     def connectionLost(self, reason=connectionDone):
         del self.users[self.name]
 
         _msg = f"{self.name} left the chat!"
-        msg = Message(_msg).encode_msg()
+        msg = Message(_msg, "SERVER")
 
         print(_msg)
         self.handle_chat(msg)
 
     def dataReceived(self, data):
+        data = pickle.loads(data)
+        author = self.name
+
         if self.state == State.GETNAME:
             self.handle_getname(data)
         else:
-            self.handle_chat(data)
+            self.handle_chat(data, author)
     
     def handle_getname(self, data):
-        name = pickle.loads(data).msg
+        name = data.msg
 
         if name in self.users:
             msg = Message("Name is taken chose another!").encode_msg()
@@ -48,18 +51,20 @@ class Server(Protocol):
         self.users[name] = self
 
         _msg = f"{self.name} joined the chat!"
-        msg = Message(_msg).encode_msg()
+        msg = Message(_msg)
 
         print(_msg)
-        self.handle_chat(msg)
+        self.handle_chat(msg, "SERVER")
 
         self.state = State.CHAT
 
-    def handle_chat(self, data):
+    def handle_chat(self, msg, author=None):
+        msg.author = author
+
         for name, conn in self.users.items():
             if name == self.name:
                 continue
-            conn.transport.write(data)
+            conn.transport.write(msg.encode_msg())
 
 class ServerFactory(BaseServerFactory):
     def __init__(self):
