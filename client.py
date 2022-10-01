@@ -1,5 +1,7 @@
 import pickle
 
+from rich.console import Console
+from rich.prompt import IntPrompt, Prompt
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.internet.protocol import Protocol
@@ -9,12 +11,17 @@ from utility import Message
 
 
 class Client(Protocol):
-    def __init__(self):
+    def __init__(self, console):
+        self.STDOUT = console
+
         reactor.callInThread(self.send_message)
 
     def dataReceived(self, data):
         msg = pickle.loads(data)
-        print(msg)
+        if msg.author == "SERVER":
+            self.STDOUT.rule(msg.msg)
+            return
+        self.STDOUT.print(str(msg))
 
     def send_message(self):
         while True:
@@ -24,8 +31,11 @@ class Client(Protocol):
 
 
 class ClientFactory(BaseClientFactory):
+    def __init__(self, console: Console):
+        self.console = console
+
     def buildProtocol(self, addr):
-        return Client()
+        return Client(self.console)
 
     def clientConnectionFailed(self, connector, reason):
         print(reason)
@@ -38,5 +48,9 @@ class ClientFactory(BaseClientFactory):
 
 if __name__ == "__main__":
     endpoint = TCP4ClientEndpoint(reactor, "localhost", 9999)
-    endpoint.connect(ClientFactory())
+
+    console = Console()
+    clFactory = ClientFactory(console)
+
+    endpoint.connect(clFactory)
     reactor.run()

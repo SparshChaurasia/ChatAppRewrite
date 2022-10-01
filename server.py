@@ -19,17 +19,20 @@ class Server(Protocol):
 
     def connectionMade(self):
         print("New connection")
-        msg = Message("Hello from server!\nPlease enter your name", "SERVER").encode_msg()
+        msg = Message("Hello!\nPlease enter your name", "SERVER").encode_msg()
         self.transport.write(msg)
 
     def connectionLost(self, reason=connectionDone):
+        if self.name not in self.users.keys():
+            return
+        
         del self.users[self.name]
 
         _msg = f"{self.name} left the chat!"
-        msg = Message(_msg, "SERVER")
+        msg = Message(_msg)
 
         print(_msg)
-        self.handle_chat(msg)
+        self.handle_chat(msg, "SERVER")
 
     def dataReceived(self, data):
         data = pickle.loads(data)
@@ -43,9 +46,10 @@ class Server(Protocol):
     def handle_getname(self, data):
         name = data.msg
 
-        if name in self.users:
-            msg = Message("Name is taken chose another!").encode_msg()
+        if name in self.users or name == "SERVER":
+            msg = Message("Name is taken chose another!", "SERVER").encode_msg()
             self.transport.write(msg)
+            return
         
         self.name = name
         self.users[name] = self
@@ -59,7 +63,8 @@ class Server(Protocol):
         self.state = State.CHAT
 
     def handle_chat(self, msg, author=None):
-        msg.author = author
+        if author != None:
+            msg.author = author
 
         for name, conn in self.users.items():
             if name == self.name:
@@ -76,6 +81,6 @@ class ServerFactory(BaseServerFactory):
 
 
 if __name__ == "__main__":
-    endpoint = TCP4ServerEndpoint(reactor, 9999)
+    endpoint = TCP4ServerEndpoint(reactor, 9999, interface='localhost')
     endpoint.listen(ServerFactory())
     reactor.run()

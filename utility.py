@@ -11,7 +11,7 @@ class Message:
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
     def __repr__(self):
-        return f"[{self.timestamp.strftime('%H:%M')}][{self.author}] {self.msg}"
+        return f"[bold][red]\[{self.timestamp.strftime('%H:%M')}][/][green]\[{self.author}][/][/] {self.msg}"
 
     def encode_msg(self):
         serial_obj = pickle.dumps(self)

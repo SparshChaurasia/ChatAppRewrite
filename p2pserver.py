@@ -16,5 +16,5 @@ class RendezvousServer(DatagramProtocol):
 
 
 if __name__ == "__main__":
-    reactor.listenUDP(9999, RendezvousServer())
+    reactor.listenUDP(9999, RendezvousServer(), interface='localhost')
     reactor.run()
