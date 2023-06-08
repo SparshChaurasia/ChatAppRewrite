@@ -2,12 +2,17 @@ import dataclasses
 import pickle
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
+
+MType = Enum("mtype", "CHAT MSG")
 
 
 @dataclass
 class Message:
     msg: str
     author: str = None
+    # mtype: MType = MType.CHAT
+    mtype: str = "CHAT"
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
     def __repr__(self):

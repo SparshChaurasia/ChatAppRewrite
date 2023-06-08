@@ -7,9 +7,10 @@ from twisted.internet.protocol import Protocol
 from twisted.internet.protocol import ServerFactory as BaseServerFactory
 from twisted.internet.protocol import connectionDone
 
-from utility import Message
+from utility import Message, MType
 
-State = Enum('state', 'GETNAME CHAT')
+State = Enum("state", "GETNAME CHAT")
+
 
 class Server(Protocol):
     def __init__(self, users):
@@ -19,17 +20,17 @@ class Server(Protocol):
 
     def connectionMade(self):
         print("New connection")
-        msg = Message("Hello!\nPlease enter your name", "SERVER").encode_msg()
+        msg = Message("Enter your username for the server.", "SERVER").encode_msg()
         self.transport.write(msg)
 
     def connectionLost(self, reason=connectionDone):
         if self.name not in self.users.keys():
             return
-        
+
         del self.users[self.name]
 
         _msg = f"{self.name} left the chat!"
-        msg = Message(_msg)
+        msg = Message(msg=_msg, mtype="MSG")
 
         print(_msg)
         self.handle_chat(msg, "SERVER")
@@ -42,7 +43,7 @@ class Server(Protocol):
             self.handle_getname(data)
         else:
             self.handle_chat(data, author)
-    
+
     def handle_getname(self, data):
         name = data.msg
 
@@ -50,12 +51,12 @@ class Server(Protocol):
             msg = Message("Name is taken chose another!", "SERVER").encode_msg()
             self.transport.write(msg)
             return
-        
+
         self.name = name
         self.users[name] = self
 
         _msg = f"{self.name} joined the chat!"
-        msg = Message(_msg)
+        msg = Message(msg=_msg, mtype="MSG")
 
         print(_msg)
         self.handle_chat(msg, "SERVER")
@@ -71,6 +72,7 @@ class Server(Protocol):
                 continue
             conn.transport.write(msg.encode_msg())
 
+
 class ServerFactory(BaseServerFactory):
     def __init__(self):
         self.users = {}
@@ -81,6 +83,6 @@ class ServerFactory(BaseServerFactory):
 
 
 if __name__ == "__main__":
-    endpoint = TCP4ServerEndpoint(reactor, 9999, interface='localhost')
+    endpoint = TCP4ServerEndpoint(reactor, 9999, interface="localhost")
     endpoint.listen(ServerFactory())
     reactor.run()
