@@ -7,7 +7,7 @@ from twisted.internet.protocol import Protocol
 from twisted.internet.protocol import ServerFactory as BaseServerFactory
 from twisted.internet.protocol import connectionDone
 
-from utility import Message, MType
+from utility import Message
 
 State = Enum("state", "GETNAME CHAT")
 
@@ -47,7 +47,7 @@ class Server(Protocol):
     def handle_getname(self, data):
         name = data.msg
 
-        if name in self.users or name == "SERVER":
+        if name in self.users.keys() or name == "SERVER":
             msg = Message("Name is taken chose another!", "SERVER").encode_msg()
             self.transport.write(msg)
             return
